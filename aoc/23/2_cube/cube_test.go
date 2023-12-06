@@ -58,3 +58,17 @@ func TestPart1(t *testing.T) {
 		t.Errorf("failure in part 1, got: %v, want: %v", got, want)
 	}
 }
+
+func TestPart2(t *testing.T) {
+	base := "test1.txt"
+	want := 2286
+	got, err := Part2(base)
+
+	if err != nil {
+		t.Errorf("failure in part2, %v", err)
+	}
+
+	if want != got {
+		t.Errorf("failure in part2, got: %v, want: %v", got, want)
+	}
+}

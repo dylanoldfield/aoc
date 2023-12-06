@@ -15,8 +15,15 @@ func main() {
 		fmt.Printf("failed in part 1")
 	}
 
-	fmt.Printf("Part 1 Answer:%v", part1)
+	fmt.Printf("Part 1 Answer:%v \n", part1)
 
+	part2, err := Part2("part1.txt")
+
+	if err != nil {
+		fmt.Printf("failed in part2")
+	}
+
+	fmt.Printf("Part 2 Answer: %v \n", part2)
 }
 
 func Part1(filename string) (int, error) {
@@ -61,6 +68,44 @@ func Part1(filename string) (int, error) {
 			roundSum += roundNum
 		}
 	}
+	return roundSum, nil
+}
+
+func Part2(filename string) (int, error) {
+	file, err := os.Open(filename)
+
+	if err != nil {
+		return -1, fmt.Errorf("issue opening the file: %v", err)
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	roundSum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		_, remainder, err := GetGameNumber(line)
+
+		if err != nil {
+			return -1, err
+		}
+
+		maxDraws, err := GetMaxDraws(remainder)
+
+		if err != nil {
+
+			return -1, err
+		}
+
+		power := 1
+
+		for _, count := range maxDraws {
+			power *= count
+		}
+
+		roundSum += power
+	}
+
 	return roundSum, nil
 }
 
