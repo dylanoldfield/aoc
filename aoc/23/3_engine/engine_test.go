@@ -22,7 +22,7 @@ func TestLoadSchematic(t *testing.T) {
 	wantNMap[2][3] = NumberPosition{12, Range{2, 3}}
 
 	wantBoundary := Boundary{2, 4}
-	gotSMap, gotNMap, gotBoundary, err := LoadSchematic(base)
+	gotSMap, gotNMap, gotBoundary, err := LoadSchematic(base, '.', false)
 
 	if err != nil {
 		t.Errorf("failed to load schema, %v", err)

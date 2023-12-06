@@ -45,7 +45,7 @@ type Boundary struct {
 }
 
 func Part1(filename string) (int, error) {
-	sMap, nMap, boundary, err := LoadSchematic(filename)
+	sMap, nMap, boundary, err := LoadSchematic(filename, '.', false)
 
 	if err != nil {
 		return -1, fmt.Errorf("failed to load schematic %v", err)
@@ -62,7 +62,7 @@ func Part1(filename string) (int, error) {
 }
 
 func Part2(filename string) (int, error) {
-	sMap, nMap, boundary, err := LoadSchematicWithGears(filename)
+	sMap, nMap, boundary, err := LoadSchematic(filename, '*', true)
 
 	if err != nil {
 		return -1, fmt.Errorf("failed to load schematic %v", err)
@@ -189,7 +189,7 @@ func addToNumMap(curNum string, row int, start int, end int, numMap map[int]map[
 	return numMap, nil
 }
 
-func LoadSchematic(filename string) (map[int][]int, map[int]map[int]NumberPosition, Boundary, error) {
+func LoadSchematic(filename string, symbol rune, include bool) (map[int][]int, map[int]map[int]NumberPosition, Boundary, error) {
 	file, err := os.Open(filename)
 	numMap := make(map[int]map[int]NumberPosition)
 	symbolMap := make(map[int][]int)
@@ -225,7 +225,7 @@ func LoadSchematic(filename string) (map[int][]int, map[int]map[int]NumberPositi
 				curNum = ""
 				start = -1
 
-				if r != '.' {
+				if checkIfLoadSymbol(r, symbol, include) {
 					symbolXs = append(symbolXs, x)
 				}
 			}
@@ -244,57 +244,12 @@ func LoadSchematic(filename string) (map[int][]int, map[int]map[int]NumberPositi
 	return symbolMap, numMap, Boundary{y - 1, lineWidth - 1}, nil
 }
 
-func LoadSchematicWithGears(filename string) (map[int][]int, map[int]map[int]NumberPosition, Boundary, error) {
-	file, err := os.Open(filename)
-	numMap := make(map[int]map[int]NumberPosition)
-	symbolMap := make(map[int][]int)
-	if err != nil {
-		return symbolMap, nil, Boundary{}, err
+func checkIfLoadSymbol(input rune, symbol rune, include bool) bool {
+	if include && input == symbol {
+		return true
 	}
-
-	scanner := bufio.NewScanner(file)
-	y := 0
-	lineWidth := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		curNum := ""
-		start := -1
-		lineWidth = len(line)
-
-		// iterate through the rows add number to map for every x,y coordinate they are apart of
-
-		var symbolXs []int
-		for x, r := range line {
-			// check if rune is a number
-			if unicode.IsDigit(r) {
-				curNum += string(r)
-				// check if first number we have seen since "." or symbol
-				if start == -1 {
-					start = x
-				}
-			} else {
-				numMap, err = addToNumMap(curNum, y, start, x-1, numMap)
-				if err != nil {
-					return symbolMap, nil, Boundary{}, err
-				}
-				curNum = ""
-				start = -1
-
-				if r == '*' {
-					symbolXs = append(symbolXs, x)
-				}
-			}
-
-		}
-		numMap, err = addToNumMap(curNum, y, start, len(line)-1, numMap)
-		if err != nil {
-			return symbolMap, nil, Boundary{}, err
-		}
-		if len(symbolXs) > 0 {
-			symbolMap[y] = symbolXs
-		}
-		y++
+	if !include && input != symbol {
+		return true
 	}
-
-	return symbolMap, numMap, Boundary{y - 1, lineWidth - 1}, nil
+	return false
 }
